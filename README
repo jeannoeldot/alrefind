@@ -7,6 +7,13 @@ VERSION         : 1.0.0
 
 LANGUE          : uniquement FR
 
+NOMS DES SCRIPTS
+
+reinstall               : script de réinstallation
+
+# FONCTIONS COMMUNES
+ai-commons              : script contenant les fonctions communes aux scripts.
 
 # RÉPERTOIRE DES FICHIERS DE CONFIGURATIONS
-refind-efi-0.7.9
+refind-efi-0.7.9        : contient les fichiers propres à rEFInd 0.7.9
+refind-linux-conf       : contient les fichiers refind_linux.conf de chaque Arch installée

@@ -1,0 +1,72 @@
+#!/bin/bash
+
+#-------------------------------------------------------------------------------
+# reinstall
+#
+# REINSTALLATION DE rEFInd 0.7.9
+#
+# ne fonctionne qu'avec la langue FR (fr_FR)
+# Created by me for me
+#
+# Run this script after your first boot with archlinux-AAAA.MM.JJ-dual.iso (as root)
+ 
+source `pwd`/ai-commons
+
+    #FINISH {{{
+    finish() {
+        print_title "RÉINSTALLATION TERMINÉE"
+        print_info_finish "\n==> INFO : Fermer tous les terminaux ouverts ( TTY 2, ... )."
+        pause_function       
+        #umount mounted partitions
+        umount -R ${MOUNTPOINT}
+        # Si dans VirtualBox
+        if [[ $IN_VIRTUAL_BOX -eq 1 ]]; then
+            print_info_finish "\n==> INFO : Dans VirtualBox, éteindre le système, modifier ordre de démarrage dans Système,\n           enlever ISO dans Stokage et relancer la VM."
+        else
+            echo -e "\n"
+        fi
+        type_fins=("Redémarrer" "Éteindre");
+        PS3="$prompt1"
+        echo -e "Sélectionner l'arrêt ( Redémarrer ou Éteindre ) :"
+        select OPT in "${type_fins[@]}"; do
+            case "$REPLY" in
+                1)
+                    reboot
+                    break
+                    ;;
+                2)
+                    poweroff
+                    break
+                    ;;
+                *)
+                    invalid_option
+                    ;;
+            esac
+        done
+    }
+    #}}}
+
+print_title "Réinstallation de rEFInd 0.7.9"
+# Editeur par défaut
+print_info_cyan "L'éditeur par défaut est nano"
+# UEFI ou BIOS
+check_is_uefi_or_bios
+if [[ $IS_UEFI -eq 1 ]]; then
+   print_info_cyan "Installation en mode UEFI."
+else
+   print_warning "Installation en mode BIOS."
+   print_warning "PAS de Réinstallation de rEFInd 0.7.9."
+   finish
+fi
+# Installation dans VirtualBox ou réelle
+check_is_in_virtualbox
+if [[ $IN_VIRTUAL_BOX -eq 1 ]]; then
+   print_info_cyan "Installation dans Oracle VM VirtualBox."
+else
+   print_info_cyan "Installation réelle."
+fi
+# Sets the interval of inactivity
+setterm -blank 0
+pause_function
+
+exit 0
