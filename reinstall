@@ -9,8 +9,43 @@
 # Created by me for me
 #
 # Run this script after your first boot with archlinux-AAAA.MM.JJ-dual.iso (as root)
+
+IS_ESP_MONTEE=0
+IS_NAME_ESP_EXISTE=0
+NAME_PARTITION_ESP=""
+
  
 source `pwd`/ai-commons
+
+
+name_partition_esp() {
+    local esp=(`fdisk -l | awk '/EFI System/ {print $1}'`)
+    echo "variable esp = "${esp}
+# ==> variable esp = /dev/sda1
+
+    if [[ "${esp}" != "" ]];then
+        IS_NAME_ESP_EXISTE=1
+        NAME_PARTITION_ESP=${esp}
+        echo "une partition ESP existe et est : "${NAME_PARTITION_ESP}
+    else
+        IS_NAME_ESP_EXISTE=0
+        echo "PAS de partition ESP !"
+    fi
+}
+#
+test_is_esp_mounted() {
+    local part_esp=(`lsblk | awk '/\/boot\/efi/ {print $7}'`)
+    echo "variable part_esp = "${part_esp}
+# ==> variable part_esp = /dev/sda1
+
+    if [[ "${part_esp}" != "" ]];then
+        IS_ESP_MONTEE=1
+        echo "une partition ESP existe et est montée. "
+    else
+        IS_ESP_MONTEE=0
+        echo "PAS de partition ESP montée."
+    fi
+}
 
     #FINISH {{{
     finish() {
@@ -46,18 +81,17 @@ source `pwd`/ai-commons
     }
     #}}}
 
-print_title "Réinstallation de rEFInd 0.7.9"
-# Editeur par défaut
-print_info_cyan "L'éditeur par défaut est nano"
+print_title "Réinstallation de rEFInd 0.7.9 si en UEFI"
 # UEFI ou BIOS
 check_is_uefi_or_bios
-if [[ $IS_UEFI -eq 1 ]]; then
-   print_info_cyan "Installation en mode UEFI."
-else
+if [[ $IS_UEFI -eq 0 ]]; then
    print_warning "Installation en mode BIOS."
    print_warning "PAS de Réinstallation de rEFInd 0.7.9."
-   finish
+   pause_function
+   exit 1
 fi
+# Editeur par défaut
+print_info_cyan "L'éditeur par défaut est nano"
 # Installation dans VirtualBox ou réelle
 check_is_in_virtualbox
 if [[ $IN_VIRTUAL_BOX -eq 1 ]]; then
@@ -68,5 +102,26 @@ fi
 # Sets the interval of inactivity
 setterm -blank 0
 pause_function
+#
+name_partition_esp
+if [[ $IS_NAME_ESP_EXISTE -eq 0 ]]; then
+   print_warning "PAS de partition ESP !"
+   print_warning "PAS de Réinstallation de rEFInd 0.7.9 !"
+   pause_function
+   exit 1
+fi
+#
+test_is_esp_mounted
+if [[ $IS_ESP_MONTEE -eq 0 ]]; then
+   print_info_cyan "PAS de partition ESP montée. !"
+   print_info_cyan "A monter dans /mnt/boot/efi"
+   print_info_cyan "Le chemin sera /mnt/boot/efi/EFI/..."
+   pause_function
+else
+   print_info_cyan "Partition ESP montée. !"
+   print_info_cyan "Le chemin sera /boot/efi/EFI/..."
+   pause_function
+fi
+#
 
 exit 0
