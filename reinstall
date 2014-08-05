@@ -10,19 +10,32 @@
 #
 # Run this script after your first boot with archlinux-AAAA.MM.JJ-dual.iso (as root)
 
-IS_ESP_MONTEE=0
+IS_ESP_MOUNTED=0
 IS_NAME_ESP_EXISTE=0
 NAME_PARTITION_ESP=""
+
+CHEMIN_CONTENU_ESP=""
+
+MOUNTPOINT_PARTITION_ESP="/mnt/boot/efi"
 
  
 source `pwd`/ai-commons
 
+mount_efi_partition_if_not_mounted() {
+    if [[ $IS_ESP_MOUNTED -eq 0 ]]; then
+        mkdir -p ${MOUNTPOINT_PARTITION_ESP}
+        if [[ $? -ne 0 ]]; then
+            return 1
+        fi
+        mount -t vfat ${NAME_PARTITION_ESP} ${MOUNTPOINT_PARTITION_ESP}
+        if [[ $? -ne 0 ]]; then
+            return 1
+        fi
+    fi
+}
 
-name_partition_esp() {
+check_and_return_name_partition_esp() {
     local esp=(`fdisk -l | awk '/EFI System/ {print $1}'`)
-    echo "variable esp = "${esp}
-# ==> variable esp = /dev/sda1
-
     if [[ "${esp}" != "" ]];then
         IS_NAME_ESP_EXISTE=1
         NAME_PARTITION_ESP=${esp}
@@ -33,17 +46,14 @@ name_partition_esp() {
     fi
 }
 #
-test_is_esp_mounted() {
+check_is_esp_mounted() {
     local part_esp=(`lsblk | awk '/\/boot\/efi/ {print $7}'`)
-    echo "variable part_esp = "${part_esp}
-# ==> variable part_esp = /dev/sda1
-
     if [[ "${part_esp}" != "" ]];then
-        IS_ESP_MONTEE=1
-        echo "une partition ESP existe et est montée. "
+        IS_ESP_MOUNTED=1
+        echo "LA partition ESP est montée. "
     else
-        IS_ESP_MONTEE=0
-        echo "PAS de partition ESP montée."
+        IS_ESP_MOUNTED=0
+        echo "La partition ESP n'est PAS montée."
     fi
 }
 
@@ -85,43 +95,56 @@ print_title "Réinstallation de rEFInd 0.7.9 si en UEFI"
 # UEFI ou BIOS
 check_is_uefi_or_bios
 if [[ $IS_UEFI -eq 0 ]]; then
-   print_warning "Installation en mode BIOS."
-   print_warning "PAS de Réinstallation de rEFInd 0.7.9."
-   pause_function
-   exit 1
+    print_warning "Installation en mode BIOS."
+    print_warning "PAS de Réinstallation de rEFInd 0.7.9."
+    pause_function
+    exit 1
 fi
 # Editeur par défaut
 print_info_cyan "L'éditeur par défaut est nano"
 # Installation dans VirtualBox ou réelle
 check_is_in_virtualbox
 if [[ $IN_VIRTUAL_BOX -eq 1 ]]; then
-   print_info_cyan "Installation dans Oracle VM VirtualBox."
+    print_info_cyan "Installation dans Oracle VM VirtualBox."
 else
-   print_info_cyan "Installation réelle."
+    print_info_cyan "Installation réelle."
 fi
 # Sets the interval of inactivity
 setterm -blank 0
 pause_function
 #
-name_partition_esp
+check_and_return_name_partition_esp
 if [[ $IS_NAME_ESP_EXISTE -eq 0 ]]; then
-   print_warning "PAS de partition ESP !"
-   print_warning "PAS de Réinstallation de rEFInd 0.7.9 !"
-   pause_function
-   exit 1
+    print_warning "PAS de partition ESP !"
+    print_warning "PAS de Réinstallation de rEFInd 0.7.9 !"
+    pause_function
+    exit 1
 fi
 #
-test_is_esp_mounted
-if [[ $IS_ESP_MONTEE -eq 0 ]]; then
-   print_info_cyan "PAS de partition ESP montée. !"
-   print_info_cyan "A monter dans /mnt/boot/efi"
-   print_info_cyan "Le chemin sera /mnt/boot/efi/EFI/..."
-   pause_function
+check_is_esp_mounted
+if [[ $IS_ESP_MOUNTED -eq 0 ]]; then
+    CHEMIN_CONTENU_ESP="${MOUNTPOINT_PARTITION_ESP}/EFI"
+    print_info_cyan "PAS de partition ESP montée. !"
+    print_info_cyan "A monter dans ${MOUNTPOINT_PARTITION_ESP}"
+    print_info_cyan "Le chemin sera : "${CHEMIN_CONTENU_ESP}"/..."
+    pause_function
 else
-   print_info_cyan "Partition ESP montée. !"
-   print_info_cyan "Le chemin sera /boot/efi/EFI/..."
-   pause_function
+    CHEMIN_CONTENU_ESP="/boot/efi/EFI"
+    print_info_cyan "Partition ESP montée. !"
+    print_info_cyan "Le chemin sera : "${CHEMIN_CONTENU_ESP}"/..."
+    pause_function
 fi
+#
+mount_efi_partition_if_not_mounted
+if [[ $? -ne 0 ]]; then
+    print_warning "Impossible de monter la partition ESP !"
+    print_warning "PAS de Réinstallation de rEFInd 0.7.9 !"
+    pause_function
+    exit 1
+fi
+#
+# TODO : MIS POUR VÉRIFICATIONS
+ls ${CHEMIN_CONTENU_ESP}
 #
 
 exit 0
