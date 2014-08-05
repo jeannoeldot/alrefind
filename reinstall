@@ -39,10 +39,10 @@ check_and_return_name_partition_esp() {
     if [[ "${esp}" != "" ]];then
         IS_NAME_ESP_EXISTE=1
         NAME_PARTITION_ESP=${esp}
-        echo "une partition ESP existe et est : "${NAME_PARTITION_ESP}
+#        echo "une partition ESP existe et est : "${NAME_PARTITION_ESP}
     else
         IS_NAME_ESP_EXISTE=0
-        echo "PAS de partition ESP !"
+#        echo "PAS de partition ESP !"
     fi
 }
 #
@@ -50,10 +50,10 @@ check_is_esp_mounted() {
     local part_esp=(`lsblk | awk '/\/boot\/efi/ {print $7}'`)
     if [[ "${part_esp}" != "" ]];then
         IS_ESP_MOUNTED=1
-        echo "LA partition ESP est montée. "
+#        echo "La partition ESP est montée. "
     else
         IS_ESP_MOUNTED=0
-        echo "La partition ESP n'est PAS montée."
+#        echo "La partition ESP n'est PAS montée."
     fi
 }
 
@@ -144,7 +144,9 @@ if [[ $? -ne 0 ]]; then
 fi
 #
 # TODO : MIS POUR VÉRIFICATIONS
+print_info_cyan "Contenu de la partion ESP :"
 ls ${CHEMIN_CONTENU_ESP}
+pause_function
 #
 
 exit 0
