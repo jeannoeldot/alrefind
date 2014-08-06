@@ -29,9 +29,12 @@ MOUNTPOINT_PARTITION_ESP="/mnt/boot/efi"
  
 mount_efi_partition_if_not_mounted() {
     if [[ $IS_ESP_MOUNTED -eq 0 ]]; then
-        mkdir -p ${MOUNTPOINT_PARTITION_ESP}
-        if [[ $? -ne 0 ]]; then
-            return 1
+        # a faire si rep n'existe pas déjà
+        if [[ ! -d ${MOUNTPOINT_PARTITION_ESP} ]]; then
+            mkdir -p ${MOUNTPOINT_PARTITION_ESP}
+            if [[ $? -ne 0 ]]; then
+                return 1
+            fi
         fi
         mount -t vfat ${NAME_PARTITION_ESP} ${MOUNTPOINT_PARTITION_ESP}
         if [[ $? -ne 0 ]]; then
@@ -71,7 +74,11 @@ check_is_esp_mounted() {
         pause_function       
         #umount mounted partitions
         if [[ $STATUS_ESP_MOUNT -eq 1 ]]; then
-            umount -R ${MOUNTPOINT}
+            umount ${NAME_PARTITION_ESP}
+            if [[ -d ${MOUNTPOINT_PARTITION_ESP} ]]; then
+                rm -rf /mnt/boot/efi
+                rm -rf /mnt/boot
+            fi
         fi
         # Si dans VirtualBox
         if [[ $IN_VIRTUAL_BOX -eq 1 ]]; then
@@ -145,12 +152,12 @@ if [[ $IS_ESP_MOUNTED -eq 0 ]]; then
     CHEMIN_CONTENU_ESP="${MOUNTPOINT_PARTITION_ESP}/EFI"
     print_info_cyan "PAS de partition ESP montée !"
     print_info_cyan "A monter dans ${MOUNTPOINT_PARTITION_ESP}"
-    print_info_cyan "Le chemin sera : "${CHEMIN_CONTENU_ESP}"/"${NAME_DIR_BOOT_MGR}
+    print_info_cyan "Le chemin du répertoire à modifier sera : "${CHEMIN_CONTENU_ESP}"/"${NAME_DIR_BOOT_MGR}
 #    pause_function
 else
     CHEMIN_CONTENU_ESP="/boot/efi/EFI"
     print_info_cyan "Partition ESP déjà montée !"
-    print_info_cyan "Le chemin sera : "${CHEMIN_CONTENU_ESP}"/"${NAME_DIR_BOOT_MGR}
+    print_info_cyan "Le chemin du répertoire à modifier sera : "${CHEMIN_CONTENU_ESP}"/"${NAME_DIR_BOOT_MGR}
 #    pause_function
 fi
 #
@@ -180,9 +187,12 @@ print_info_cyan "CONFIRMER LES MODIFICATIONS"
 read_input_text "Confirmer la réinstallation de rEFInd 0.7.9"
 if [[ $OPTION == n ]]; then
     print_info_finish "\n==> INFO : PAS de Réinstallation de rEFInd 0.7.9 !"
-    #umount mounted partitions
     if [[ $STATUS_ESP_MOUNT -eq 1 ]]; then
-        umount -R ${MOUNTPOINT}
+        umount ${NAME_PARTITION_ESP}
+        if [[ -d ${MOUNTPOINT_PARTITION_ESP} ]]; then
+            rm -rf /mnt/boot/efi
+            rm -rf /mnt/boot
+        fi
     fi
     exit 0
 fi
