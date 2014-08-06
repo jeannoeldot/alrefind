@@ -183,21 +183,21 @@ pause_function
 #
 
 # Suppression rep icons (avec png)
-print_info_cyan "Sauvegarde du répertoire << icons >> V 0.8.x dans:"${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+print_info_cyan "Sauvegarde du répertoire << icons >> V 0.8.x dans : "${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
 cp -R ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/icons ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/icons.backup.v.0.8.x
 
-print_info_cyan "Sauvegarde fichier refind.conf V 0.8.x dans:"${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+print_info_cyan "Sauvegarde fichier refind.conf V 0.8.x dans : "${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
 cp -v ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/refind.conf ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/refind.conf.backup.v.0.8.x
 
-print_info_cyan "Sauvegarde du manager de boot V 0.8.x dans:"${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+print_info_cyan "Sauvegarde du manager de boot V 0.8.x dans : "${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
 cp -v ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/${NAME_BOOT_MGR} ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/${NAME_BOOT_MGR}.backup.v.0.8.x
 
 
 # Copies du nouveau répertoire icons et des fichiers
-print_info_cyan "Copie du répertoire << icons >> V 0.7.9 dans:"${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+print_info_cyan "Copie du répertoire << icons >> V 0.7.9 dans : "${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
 cp -R refind-efi-0.7.9/icons ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/icons
 
-print_info_cyan "Copie des fichiers V 0.7.9 dans:"${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+print_info_cyan "Copie des fichiers V 0.7.9 dans : "${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
 cp -v refind-efi-0.7.9/refind_x64.efi ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/${NAME_BOOT_MGR}
 
 if [[ $IN_VIRTUAL_BOX -eq 1 ]]; then
