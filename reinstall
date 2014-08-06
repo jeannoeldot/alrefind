@@ -10,19 +10,23 @@
 #
 # Run this script after your first boot with archlinux-AAAA.MM.JJ-dual.iso (as root)
 
+source `pwd`/ai-commons
+
+# VARIABLES
 IS_ESP_MOUNTED=0
+STATUS_ESP_MOUNT=0
 IS_NAME_ESP_EXISTE=0
+
 NAME_PARTITION_ESP=""
 
 CHEMIN_CONTENU_ESP=""
 
 NAME_DIR_BOOT_MGR=""
+NAME_BOOT_MGR=""
 
 MOUNTPOINT_PARTITION_ESP="/mnt/boot/efi"
 
  
-source `pwd`/ai-commons
-
 mount_efi_partition_if_not_mounted() {
     if [[ $IS_ESP_MOUNTED -eq 0 ]]; then
         mkdir -p ${MOUNTPOINT_PARTITION_ESP}
@@ -33,6 +37,7 @@ mount_efi_partition_if_not_mounted() {
         if [[ $? -ne 0 ]]; then
             return 1
         fi
+        STATUS_ESP_MOUNT=1
     fi
 }
 
@@ -62,11 +67,13 @@ check_is_esp_mounted() {
 # TODO : A REVOIR
     #FINISH {{{
     finish() {
-        print_title "RÉINSTALLATION TERMINÉE"
+        print_title "RÉINSTALLATION DE rEFInd 0.7.9 TERMINÉE"
         print_info_finish "\n==> INFO : Fermer tous les terminaux ouverts ( TTY 2, ... )."
         pause_function       
         #umount mounted partitions
-        umount -R ${MOUNTPOINT}
+        if [[ $STATUS_ESP_MOUNT -eq 1 ]]; then
+            umount -R ${MOUNTPOINT}
+        fi
         # Si dans VirtualBox
         if [[ $IN_VIRTUAL_BOX -eq 1 ]]; then
             print_info_finish "\n==> INFO : Dans VirtualBox, éteindre le système, modifier ordre de démarrage dans Système,\n           enlever ISO dans Stokage et relancer la VM."
@@ -93,8 +100,12 @@ check_is_esp_mounted() {
         done
     }
     #}}}
+#
+# DÉBUT DU SCRIPT REINSTALL
+#
 
-print_title "Réinstallation de rEFInd 0.7.9 si en UEFI"
+print_title "RÉINSTALLATION DE rEFInd 0.7.9 SI EN UEFI"
+
 # UEFI ou BIOS
 check_is_uefi_or_bios
 if [[ $IS_UEFI -eq 0 ]]; then
@@ -112,15 +123,17 @@ fi
 check_is_in_virtualbox
 if [[ $IN_VIRTUAL_BOX -eq 1 ]]; then
     NAME_DIR_BOOT_MGR="BOOT"
+    NAME_BOOT_MGR="bootx64.efi"
     print_info_cyan "Installation dans Oracle VM VirtualBox."
 else
     NAME_DIR_BOOT_MGR="refind"
+    NAME_BOOT_MGR="refind_x64.efi"
     print_info_cyan "Installation réelle."
 fi
 
 # Sets the interval of inactivity
 setterm -blank 0
-pause_function
+#pause_function
 #
 
 check_and_return_name_partition_esp
@@ -156,20 +169,51 @@ if [[ $? -ne 0 ]]; then
 fi
 #
 
-# TODO : MIS POUR VÉRIFICATIONS
+# TODO : MIS POUR VÉRIFICATIONS AVANT MODIFS
+print_info_cyan "Status si la partion ESP a été montée : STATUS_ESP_MOUNT = "$STATUS_ESP_MOUNT
+
 print_info_cyan "Contenu de la partion ESP :"
 ls ${CHEMIN_CONTENU_ESP}
 
-print_info_cyan "Répertoire du Boot Manager à modifier :"
-ls ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+print_info_cyan "AVANT MODIFICATIONS..."
+print_info_cyan "Contenu du répertoire du Boot Manager qui sera modifié :"
+ls -la ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
 
 pause_function
 #
 
+# Suppression rep icons (avec png)
+print_info_cyan "Sauvegarde du répertoire << icons >> V 0.8.x dans:"${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+cp -R ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/icons ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/icons.backup.v.0.8.x
+
+print_info_cyan "Sauvegarde fichier refind.conf V 0.8.x dans:"${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+cp -v ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/refind.conf ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/refind.conf.backup.v.0.8.x
+
+print_info_cyan "Sauvegarde du manager de boot V 0.8.x dans:"${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+cp -v ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/${NAME_BOOT_MGR} ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/${NAME_BOOT_MGR}.backup.v.0.8.x
 
 
+# Copies du nouveau répertoire icons et des fichiers
+print_info_cyan "Copie du répertoire << icons >> V 0.7.9 dans:"${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+cp -R refind-efi-0.7.9/icons ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/icons
 
+print_info_cyan "Copie des fichiers V 0.7.9 dans:"${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+cp -v refind-efi-0.7.9/refind_x64.efi ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/${NAME_BOOT_MGR}
 
+if [[ $IN_VIRTUAL_BOX -eq 1 ]]; then
+    cp -v refind-efi-0.7.9/VBOX-refind.conf ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/refind.conf
+else
+    cp -v refind-efi-0.7.9/REEL-refind.conf ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}/refind.conf
+fi
 
+# TODO : MIS POUR VÉRIFICATIONS APRES MODIFS
+print_info_cyan "APRÈS MODIFICATIONS..."
+print_info_cyan "Contenu du répertoire du Boot Manager modifié :"
+ls -la ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
+pause_function
+#
+
+# FIN
+finish
 
 exit 0
