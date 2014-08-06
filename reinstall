@@ -64,7 +64,6 @@ check_is_esp_mounted() {
     fi
 }
 
-# TODO : A REVOIR
     #FINISH {{{
     finish() {
         print_title "RÉINSTALLATION DE rEFInd 0.7.9 TERMINÉE"
@@ -114,10 +113,6 @@ if [[ $IS_UEFI -eq 0 ]]; then
     pause_function
     exit 1
 fi
-# TODO : INUTILE : COMMENTÉ
-# # Editeur par défaut
-# print_info_cyan "L'éditeur par défaut est nano"
-##
 
 # Installation dans VirtualBox ou réelle
 check_is_in_virtualbox
@@ -150,13 +145,13 @@ if [[ $IS_ESP_MOUNTED -eq 0 ]]; then
     CHEMIN_CONTENU_ESP="${MOUNTPOINT_PARTITION_ESP}/EFI"
     print_info_cyan "PAS de partition ESP montée. !"
     print_info_cyan "A monter dans ${MOUNTPOINT_PARTITION_ESP}"
-    print_info_cyan "Le chemin sera : "${CHEMIN_CONTENU_ESP}"/..."
-    pause_function
+    print_info_cyan "Le chemin sera : "${CHEMIN_CONTENU_ESP}"/"${NAME_DIR_BOOT_MGR}
+#    pause_function
 else
     CHEMIN_CONTENU_ESP="/boot/efi/EFI"
     print_info_cyan "Partition ESP montée. !"
-    print_info_cyan "Le chemin sera : "${CHEMIN_CONTENU_ESP}"/..."
-    pause_function
+    print_info_cyan "Le chemin sera : "${CHEMIN_CONTENU_ESP}"/"${NAME_DIR_BOOT_MGR}
+#    pause_function
 fi
 #
 
@@ -170,17 +165,27 @@ fi
 #
 
 # TODO : MIS POUR VÉRIFICATIONS AVANT MODIFS
-print_info_cyan "Status si la partion ESP a été montée : STATUS_ESP_MOUNT = "$STATUS_ESP_MOUNT
+#print_info_cyan "Status si la partion ESP a été montée : STATUS_ESP_MOUNT = "$STATUS_ESP_MOUNT
 
-print_info_cyan "Contenu de la partion ESP :"
-ls ${CHEMIN_CONTENU_ESP}
+# print_info_cyan "Contenu de la partion ESP :"
+# ls ${CHEMIN_CONTENU_ESP}
 
-print_info_cyan "AVANT MODIFICATIONS..."
-print_info_cyan "Contenu du répertoire du Boot Manager qui sera modifié :"
+print_info_cyan "AVANT MODIFICATIONS : Contenu du répertoire du Boot Manager qui sera modifié :"
 ls -la ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
 
-pause_function
+#pause_function
 #
+
+read_input_text "Confirmer la réinstallation de rEFInd 0.7.9"
+if [[ $OPTION == n ]]; then
+    print_info_finish "\n==> INFO : PAS de Réinstallation de rEFInd 0.7.9 !"
+    #umount mounted partitions
+    if [[ $STATUS_ESP_MOUNT -eq 1 ]]; then
+        umount -R ${MOUNTPOINT}
+    fi
+    exit 0
+fi
+
 
 # Suppression rep icons (avec png)
 print_info_cyan "Sauvegarde du répertoire << icons >> V 0.8.x dans : "${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
