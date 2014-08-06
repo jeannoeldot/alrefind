@@ -143,13 +143,13 @@ fi
 check_is_esp_mounted
 if [[ $IS_ESP_MOUNTED -eq 0 ]]; then
     CHEMIN_CONTENU_ESP="${MOUNTPOINT_PARTITION_ESP}/EFI"
-    print_info_cyan "PAS de partition ESP montée. !"
+    print_info_cyan "PAS de partition ESP montée !"
     print_info_cyan "A monter dans ${MOUNTPOINT_PARTITION_ESP}"
     print_info_cyan "Le chemin sera : "${CHEMIN_CONTENU_ESP}"/"${NAME_DIR_BOOT_MGR}
 #    pause_function
 else
     CHEMIN_CONTENU_ESP="/boot/efi/EFI"
-    print_info_cyan "Partition ESP montée. !"
+    print_info_cyan "Partition ESP déjà montée !"
     print_info_cyan "Le chemin sera : "${CHEMIN_CONTENU_ESP}"/"${NAME_DIR_BOOT_MGR}
 #    pause_function
 fi
@@ -176,6 +176,7 @@ ls -la ${CHEMIN_CONTENU_ESP}/${NAME_DIR_BOOT_MGR}
 #pause_function
 #
 
+print_info_cyan "CONFIRMER LES MODIFICATIONS"
 read_input_text "Confirmer la réinstallation de rEFInd 0.7.9"
 if [[ $OPTION == n ]]; then
     print_info_finish "\n==> INFO : PAS de Réinstallation de rEFInd 0.7.9 !"
