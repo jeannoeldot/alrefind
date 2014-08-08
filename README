@@ -1,19 +1,25 @@
-Scripts personnels de réinstallation de rEFInd 0.7.9
-=====================================================
+Scripts personnels de réinstallation de rEFInd
+==============================================
 
 LICENSE         : GPL2 (Voir COPYING pour les détails).
 
-VERSION         : 1.0.0
+VERSION         : 1.0.1
 
 LANGUE          : uniquement FR
 
+
 NOMS DES SCRIPTS
 
-reinstall               : script de réinstallation
+reinstall               : script de réinstallation de rEFInd 0.7.9
+
 
 # FONCTIONS COMMUNES
 ai-commons              : script contenant les fonctions communes aux scripts.
 
+
 # RÉPERTOIRE DES FICHIERS DE CONFIGURATIONS
+
 refind-efi-0.7.9        : contient les fichiers propres à rEFInd 0.7.9
+
 refind-linux-conf       : contient les fichiers refind_linux.conf de chaque Arch installée
+
